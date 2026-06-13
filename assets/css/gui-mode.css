@@ -216,4 +216,39 @@
     background-repeat: no-repeat;
     background-position: center;
 }
+/* Precise Alignment Framework for the Solid White KVM Cycle Button */
+#kvm-big-red-cycle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    
+    /* Matches standard system titlebars and notification widths exactly */
+    height: 60px; 
+    width: 44px;  
+    
+    /* Updated Color Configuration to #FFFFFF */
+    background: #FFFFFF;
+    border: none;
+    border-right: 1px solid #C0C0C0; /* Muted gray border line */
+    color: #000000; /* Dark black text for high-contrast visibility against white */
+    
+    /* Univac Required Typography Properties */
+    font-family: "Courier New", "Courier", "Lucida Console", monospace;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: -0.5px;
+    text-align: center;
+    padding: 0;
+    cursor: pointer;
+    
+    /* Clean shadow treatment for a physical flat tile look */
+    box-shadow: 1px 0px 3px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+#kvm-big-red-cycle:active {
+    background: #F0F0F0; /* Clean light gray highlight when active/pressed */
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
 
