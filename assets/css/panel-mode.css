@@ -276,4 +276,94 @@
     text-transform: uppercase;
     box-shadow: inset 0px 2px 5px rgba(0,0,0,0.9);
 }
+/* Analog Meter Layout Frames */
+.analog-meter-housing {
+    background-color: #1A1D20;
+    border: 2px solid #2F353A;
+    border-radius: 4px;
+    padding: 6px;
+    width: 100%;
+    max-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: inset 0px 2px 5px rgba(0,0,0,0.5);
+}
+
+.meter-face-title {
+    font-size: 9px;
+    color: #A0A0A0;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.meter-casing {
+    width: 120px;
+    height: 70px;
+    background-color: #EBECE7; /* Vintage matte parchment yellow-white dial face */
+    border: 2px solid #0B0B0B;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0px 4px 6px rgba(0,0,0,0.3);
+}
+
+.meter-scale-arc {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 1.5px solid #222222;
+    border-radius: 50%;
+    top: 15px;
+    left: 10px;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.meter-scale-ticks {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+    top: 2px;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 8px;
+    color: #111111;
+    font-weight: bold;
+}
+
+/* Mechanical Needle Element Assemblage */
+.meter-needle-pivot {
+    position: absolute;
+    bottom: -10px;
+    left: 58px;
+    width: 4px;
+    height: 4px;
+    background-color: #111111;
+}
+
+.meter-needle-arm {
+    position: absolute;
+    bottom: 0;
+    left: 1px;
+    width: 1.5px;
+    height: 52px;
+    background-color: #D1172B; /* High-visibility safety-crimson structural indicator needle */
+    transform-origin: bottom center;
+    box-shadow: 1px 0px 2px rgba(0,0,0,0.2);
+}
+
+.meter-unit-tag {
+    position: absolute;
+    bottom: 4px;
+    width: 100%;
+    text-align: center;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 8px;
+    color: #555555;
+}
 
