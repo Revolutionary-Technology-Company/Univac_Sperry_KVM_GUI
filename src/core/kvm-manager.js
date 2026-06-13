@@ -20,11 +20,26 @@ export class UnivacKvmManager {
         // Connect WebSocket client to the bridge network interface
         this.bridge.connect();
 
-        // Bind system connection status messages directly into the non-scrolling row-25 status line
+        // Direct pipeline intercept mapping out network health straight onto Row 25
         this.bridge.registerStatusListener((status) => {
-            if (this.tuiScreen) {
-                this.tuiScreen.writeStatusLine(`AEGIS BRIDGE STATUS: ${status}`);
-                this.tuiScreen.render();
+            if (!this.tuiScreen) return;
+            
+            switch(status) {
+                case 'ONLINE / LINKED':
+                    this.tuiScreen.keyboardLocked = false;
+                    this.tuiScreen.writeStatusLine("SYSTEM READY - SPERRY UNIVAC 1100 INTERFACE", 'NORMAL');
+                    break;
+                case 'CONNECTING...':
+                    this.tuiScreen.keyboardLocked = true; // Lock array
+                    this.tuiScreen.writeStatusLine("RETRY / WAIT - ACQUIRING LINK ROUTE TO BRIDGE NETWORK...", 'WARN');
+                    break;
+                case 'OFFLINE - RETRYING':
+                    this.tuiScreen.keyboardLocked = true;
+                    // Flash critical error code across the screen buffer
+                    this.tuiScreen.writeStatusLine("LINE ERR - LINK LOST WITH UNIVAC-AEGIS-BRIDGE. RETRYING...", 'CRIT');
+                    break;
+            }
+            this.tuiScreen.render();
             }
         });
 
