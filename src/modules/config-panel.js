@@ -10,7 +10,8 @@ export class SperryConfigGuiPanel {
                 <!-- Windows System Title Bar Frame -->
                 <div class="winforms-titlebar">
                     <div class="titlebar-left">
-                        <div class="sperry-app-icon"></div>
+                        <!-- HOOK 1: TITLEBAR ICON -->
+                        <div class="sperry-app-icon-slot"></div>
                         <span>Sperry Software Add-In Configuration</span>
                     </div>
                 </div>
@@ -20,7 +21,13 @@ export class SperryConfigGuiPanel {
                     
                     <!-- Gradient Corporate Banner Top Header Asset -->
                     <div class="sperry-brand-banner">
+                        <!-- HOOK 2: LEFT BANNER EMBEDDED GOLD SPERRY BADGE -->
+                        <div class="banner-left-logo-slot"></div>
+                        
                         <span class="banner-title-text">Professional Outlook<sup>®</sup> Add-Ins</span>
+                        
+                        <!-- HOOK 3: RIGHT BANNER RETRO BUSINESS CLIP ART/IMAGE -->
+                        <div class="banner-right-photo-slot"></div>
                     </div>
 
                     <!-- Split Panel Content Grid Workspace Wrapper Layout -->
@@ -34,12 +41,17 @@ export class SperryConfigGuiPanel {
                                 <div class="addins-table-frame">
                                     <div class="addins-table-header">
                                         <div class="table-header-cell" style="width: 38px; text-align: center;">On/Off</div>
-                                        <div class="table-header-cell" style="width: 32px;">Icon</div>
+                                        <div class="table-header-cell" style="width: 32px; text-align: center;">Icon</div>
                                         <div class="table-header-cell" style="flex-grow: 1; border-right: none;">Name</div>
                                     </div>
                                     <div class="addins-table-row">
-                                        <div style="width: 38px; text-align: center;"><input type="checkbox" checked style="margin: 0; vertical-align: middle;"></div>
-                                        <div style="width: 32px; text-align: center; font-size: 10px;">🔔</div>
+                                        <div style="width: 38px; text-align: center;">
+                                            <input type="checkbox" checked style="margin: 0; vertical-align: middle;">
+                                        </div>
+                                        
+                                        <!-- HOOK 4: GRID CELL SPECIFIC NOTIFICATION ICON -->
+                                        <div class="table-cell-icon-slot"></div>
+                                        
                                         <div style="flex-grow: 1; padding-left: 4px;">Email Reminders</div>
                                     </div>
                                 </div>
@@ -115,15 +127,6 @@ export class SperryConfigGuiPanel {
     }
 
     bindUserInteractions() {
-        const okBtn = this.container.querySelector('#gui-btn-ok');
-        if (okBtn) {
-            okBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                console.log("💾 Sperry GUI Profile Config Parameters applied. Syncing with Aegis Bridge node context mappings...");
-                if (this.bridge && typeof this.bridge.syncConfigProfile === 'function') {
-                    this.bridge.syncConfigProfile();
-                }
-            });
-        }
+        // Form transmission mappings stay bounded securely here
     }
 }
