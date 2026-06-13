@@ -1,80 +1,101 @@
+/**
+ * SPERRY UNIVAC KVM CONSOLE CORE MANAGER
+ * Coordinates viewports, network pipelines, skeuomorphic assets, and touch routing.
+ */
 import { SperryTuiScreen } from '../components/tui-screen.js';
 import { SperryConfigGuiPanel } from '../modules/config-panel.js';
 import { System110080Panel } from '../modules/system-1100-80.js';
-import { UnivacBridgeClient } from './bridge-client.js'; // Import real pipeline
+import { UnivacBridgeClient } from './bridge-client.js'; 
+import { MainframeTelemetryMock } from './telemetry-mock.js';
 
 export class UnivacKvmManager {
     constructor() {
+        // Strict ordered sequential loop for one-way input navigation
         this.modes = ['TUI', 'GUI', 'PANEL'];
         this.currentModeIndex = 0;
 
+        // Sub-interface controller allocations
         this.tuiScreen = null;
         this.configGui = null;
         this.hardwarePanel = null;
-
-        // Instantiate real WebSocket pipeline (Points to window host address dynamically)
+        
+        // Network pipeline links
         this.bridge = new UnivacBridgeClient();
+        this.simulator = null; 
     }
 
+    /**
+     * Entry hook: bootstraps components, hooks network states, and maps inputs.
+     */
     init() {
-        // Connect WebSocket client to the bridge network interface
+        // 1. Establish pipeline connection with the Univac-Aegis-bridge
         this.bridge.connect();
 
-        // Direct pipeline intercept mapping out network health straight onto Row 25
-        this.bridge.registerStatusListener((status) => {
-            if (!this.tuiScreen) return;
-            
-            switch(status) {
-                case 'ONLINE / LINKED':
-                    this.tuiScreen.keyboardLocked = false;
-                    this.tuiScreen.writeStatusLine("SYSTEM READY - SPERRY UNIVAC 1100 INTERFACE", 'NORMAL');
-                    break;
-                case 'CONNECTING...':
-                    this.tuiScreen.keyboardLocked = true; // Lock array
-                    this.tuiScreen.writeStatusLine("RETRY / WAIT - ACQUIRING LINK ROUTE TO BRIDGE NETWORK...", 'WARN');
-                    break;
-                case 'OFFLINE - RETRYING':
-                    this.tuiScreen.keyboardLocked = true;
-                    // Flash critical error code across the screen buffer
-                    this.tuiScreen.writeStatusLine("LINE ERR - LINK LOST WITH UNIVAC-AEGIS-BRIDGE. RETRYING...", 'CRIT');
-                    break;
-            }
-            this.tuiScreen.render();
-            }
-        });
-
-        // Initialize component UI layout panels passing the real network client down
+        // 2. Instantiate and mount UI engines into their respective container nodes
         this.tuiScreen = new SperryTuiScreen('tui-matrix-container', this.bridge);
         this.configGui = new SperryConfigGuiPanel('viewport-gui', this.bridge);
         this.hardwarePanel = new System110080Panel('viewport-panel', this.bridge);
 
         this.configGui.init();
         this.hardwarePanel.init();
-        
-        // Setup base layout text grids
+
+        // 3. Bind WebSocket network state alerts directly to the non-scrolling TUI status row 25
+        this.bridge.registerStatusListener((status) => {
+            if (!this.tuiScreen) return;
+            switch(status) {
+                case 'ONLINE / LINKED':
+                    this.tuiScreen.keyboardLocked = false;
+                    this.tuiScreen.writeStatusLine("SYSTEM READY - SPERRY UNIVAC 1100 INTERFACE", 'NORMAL');
+                    break;
+                case 'CONNECTING...':
+                    this.tuiScreen.keyboardLocked = true; // Lock local keyboard array buffer
+                    this.tuiScreen.writeStatusLine("RETRY / WAIT - ACQUIRING LINK ROUTE TO BRIDGE NETWORK...", 'WARN');
+                    break;
+                case 'OFFLINE - RETRYING':
+                    this.tuiScreen.keyboardLocked = true;
+                    this.tuiScreen.writeStatusLine("LINE ERR - LINK LOST WITH UNIVAC-AEGIS-BRIDGE. RETRYING...", 'CRIT');
+                    break;
+            }
+            this.tuiScreen.render();
+        });
+
+        // 4. Initialize and boot the error simulation test bench for standalone testing
+        this.simulator = new MainframeTelemetryMock(this.bridge, this.tuiScreen);
+        this.simulator.start();
+
+        // 5. Populate initial baseline form templates onto the screen grid buffer
         this.tuiScreen.defineField(2, 5, "SPERRY UNIVAC 1100/80 MAIN KVM BRIDGE CONSOLE");
         this.tuiScreen.defineField(4, 5, "INPUT ADDRESS NODE:  ");
         this.tuiScreen.defineField(4, 26, "        ", "input");
         this.tuiScreen.render();
 
+        // 6. Register touch interactions, dashboard triggers, and system keyboard macros
         this.bindNavigationTargets();
+        this.bindSimulationButtons();
         this.registerKeyboardShortcuts();
+        
+        // Synchronize display layout frames to initial default (TUI Mode)
         this.updateViewportState();
 
-        // Listen for hardware telemetry states pushed over the network back from your mainframe
+        // 7. Subscribe to real-time telemetry frames coming back upstream from your mainframe nodes
         this.bridge.registerMessageListener((msg) => this.handleIncomingTelemetry(msg));
     }
 
+    /**
+     * Attaches handlers to tabs and the high-contrast crimson input cycle button.
+     */
     bindNavigationTargets() {
+        // Standard Tab navigation strips optimized for larger human-finger footprints
         document.querySelectorAll('.touch-tab').forEach(tab => {
             tab.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                this.currentModeIndex = this.modes.indexOf(tab.getAttribute('data-mode'));
+                const targetMode = tab.getAttribute('data-mode');
+                this.currentModeIndex = this.modes.indexOf(targetMode);
                 this.updateViewportState();
             }, { passive: false });
         });
 
-        // Hook up our white-on-crimson (#D1172B) button
+        // Map interactions to the White-on-Crimson (#D1172B) KVM Cycle button
         const bigRedBtn = document.getElementById('kvm-big-red-cycle');
         if (bigRedBtn) {
             bigRedBtn.addEventListener('touchstart', (e) => {
@@ -82,6 +103,7 @@ export class UnivacKvmManager {
                 this.cycleNextInput();
             }, { passive: false });
             
+            // Desktop mouse fallback execution environment click binding
             bigRedBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.cycleNextInput();
@@ -89,29 +111,75 @@ export class UnivacKvmManager {
         }
     }
 
+    /**
+     * Binds the local testing dashboard overlays to inject network faults on demand.
+     */
+    bindSimulationButtons() {
+        const btnStable = document.getElementById('bench-stable');
+        const btnUnstable = document.getElementById('bench-unstable');
+        const btnDead = document.getElementById('bench-dead');
+        
+        if (!btnStable || !btnUnstable || !btnDead) return;
+
+        const allBtns = [btnStable, btnUnstable, btnDead];
+        const setVisualActive = (target) => {
+            allBtns.forEach(b => b.classList.remove('active'));
+            target.classList.add('active');
+        };
+
+        btnStable.addEventListener('click', () => {
+            setVisualActive(btnStable);
+            this.simulator.setNetworkProfile('STABLE');
+        });
+
+        btnUnstable.addEventListener('click', () => {
+            setVisualActive(btnUnstable);
+            this.simulator.setNetworkProfile('UNSTABLE');
+        });
+
+        btnDead.addEventListener('click', () => {
+            setVisualActive(btnDead);
+            this.simulator.setNetworkProfile('DEAD');
+        });
+    }
+
+    /**
+     * Intercepts keystroke macros to handle KVM navigation loops natively.
+     */
     registerKeyboardShortcuts() {
         window.addEventListener('keydown', (e) => {
+            // Listen for explicit Ctrl + N macro combinations
             if (e.ctrlKey && e.key.toLowerCase() === 'n') {
-                e.preventDefault();
+                e.preventDefault(); // Stop native browser window execution actions
                 this.cycleNextInput();
             }
         });
     }
 
+    /**
+     * Advances the active viewport index forward by one step along a closed loop sequence.
+     */
     cycleNextInput() {
         this.currentModeIndex = (this.currentModeIndex + 1) % this.modes.length;
         this.updateViewportState();
     }
 
+    /**
+     * Swaps display frameworks by managing CSS animation utility viewport classes.
+     */
     updateViewportState() {
         const activeMode = this.modes[this.currentModeIndex];
         
-        // Stream the KVM transition telemetry event straight out across the network pipeline
+        // Push telemetry state events immediately out over the active WebSocket channel
         this.bridge.sendKvmCycleEvent(this.currentModeIndex, activeMode);
 
-        document.querySelectorAll('.kvm-screen-pane').forEach(pane => pane.classList.remove('active'));
+        // Hide inactive layers and reveal target viewport panel canvas
+        document.querySelectorAll('.kvm-screen-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
         document.getElementById(`viewport-${activeMode.toLowerCase()}`).classList.add('active');
 
+        // Maintain highlighted states across the top navigation tab ribbons
         document.querySelectorAll('.touch-tab').forEach(tab => {
             if (tab.getAttribute('data-mode') === activeMode) {
                 tab.classList.add('active');
@@ -120,24 +188,35 @@ export class UnivacKvmManager {
             }
         });
 
+        // Trigger individual UI canvas repaints if a terminal window takes focus
         if (activeMode === 'TUI' && this.tuiScreen) {
             this.tuiScreen.render();
         }
     }
 
     /**
-     * Handles downstream memory array manipulations sent directly from the mainframes
+     * Core router handling inbound live mainframe register changes.
      */
     handleIncomingTelemetry(envelope) {
-        // e.g., if the mainframe modifies registers, flash the hardware panels or print directly to the TUI
         if (envelope.action === "CORE_REG_UPDATE") {
             const { reg, val } = envelope.payload;
-            console.log(`📥 Downstream Hardware Sync: Mainframe updated register [${reg}] to [${val}]`);
-            // Update individual dial indicators here if required
+            console.log(`📥 Downstream Sync Receiver -> Register [${reg}] updated to [${val}]`);
+            
+            // Map updates directly to individual skeuomorphic VST switches or dials if mounted
+            if (this.hardwarePanel && this.hardwarePanel.controls[reg]) {
+                const controlItem = this.hardwarePanel.controls[reg];
+                if (typeof controlItem.updateHardwareState === 'function') {
+                    controlItem.currentStep = val;
+                    controlItem.updateHardwareState();
+                } else if (typeof controlItem.toggleState === 'function' && controlItem.state !== val) {
+                    controlItem.toggleState();
+                }
+            }
         }
     }
 }
 
+// Automatically instantiate the application instance upon DOM assembly completion
 window.addEventListener('DOMContentLoaded', () => {
     new UnivacKvmManager().init();
 });
