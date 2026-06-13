@@ -55,3 +55,32 @@
         color: #33ff33;
     }
 }
+/* Standard Operational State: Low Intensity Olive/Green */
+.tui-attr-status-normal {
+    background-color: #002200;
+    color: #33ff33;
+    font-weight: bold;
+    border-top: 1px solid #00aa00;
+}
+
+/* Warning State (Interrupted/lost frames retry loop): Saturated Amber */
+.tui-attr-status-warn {
+    background-color: #3a2000;
+    color: #ffb000;
+    font-weight: bold;
+    border-top: 1px solid #ffb000;
+}
+
+/* Critical Hardware Failure (Bridge link drop out completely): Saturated Crimson */
+.tui-attr-status-crit {
+    background-color: #4a0004;
+    color: #ffffff;
+    font-weight: bold;
+    border-top: 1px solid #D1172B; /* Matches your Crimson Red KVM button accent */
+}
+
+/* Visual pulse animation style for typing violations on locked lines */
+.hardware-flash-alert {
+    filter: brightness(2.5);
+    background-color: #d1172b !important;
+}
