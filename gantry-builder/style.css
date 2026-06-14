@@ -1,0 +1,128 @@
+/* ==========================================================================
+   SPERRY SOFTWARE COLOR PATCH ONLY - KEEPS EXACT COMPONENT SPACING & RESPONSIVENESS
+   ========================================================================== */
+
+body { 
+    background-color: #DDE7F5; /* Genuine WinForms Window Face Blue */
+    color: #000000;            /* Default strict system typography black */
+    font-family: 'Tahoma', 'Segoe UI', monospace; 
+    padding: 20px; 
+}
+
+h2 {
+    color: #032E6A;            /* Deep Corporate Navy */
+}
+
+p {
+    color: #1E395B;
+}
+
+.builder-workspace { 
+    display: flex; 
+    gap: 20px; 
+    height: 80vh; 
+}
+
+/* Left Hand Module Drawer Panel */
+.instruction-drawer { 
+    width: 250px; 
+    background: #C2D1E5;      /* Table canvas background gray-blue container fill */
+    border: 1px solid #7F9DB9; /* Hard-coded classic client pane frame line */
+    padding: 10px; 
+    border-radius: 4px; 
+    overflow-y: auto;
+    color: #000000;
+}
+
+.instruction-drawer h3 {
+    color: #032E6A;
+}
+
+.draggable-instruction-block { 
+    background: #FFFFFF;      /* Clean WinForms text box white fill */
+    border: 1px solid #9BB4D6;
+    border-left: 4px solid #F7931E; /* Signature Sperry Signal Orange */
+    padding: 8px; 
+    margin-bottom: 8px; 
+    cursor: grab; 
+    font-size: 11px; 
+    color: #000000;
+}
+
+/* Center Grid Assembly Dropzone */
+.gantry-layout-canvas { 
+    flex-grow: 1; 
+    background: #F0F5FA;      /* Inner canvas window body background tint */
+    border: 2px dashed #7F9DB9; 
+    border-radius: 4px; 
+    padding: 15px; 
+    overflow-y: auto; 
+    position: relative; 
+}
+
+.gantry-dropped-row { 
+    display: flex; 
+    background: #FFFFFF;      /* Solid white for stacked active components */
+    border: 1px solid #9BB4D6; 
+    margin-bottom: 10px; 
+    padding: 10px; 
+    align-items: center; 
+    position: relative;
+    color: #000000;
+}
+
+.remove-btn { 
+    background: #D1172B;      /* Custom Crimson Red theme accent */
+    color: #FFFFFF; 
+    border: none; 
+    padding: 2px 6px; 
+    cursor: pointer; 
+    font-size: 10px; 
+    position: absolute; 
+    right: 5px; 
+    top: 5px;
+}
+
+/* Right Panel Save Management Deck */
+.template-save-deck { 
+    width: 300px; 
+    background: #E9EEF4;      /* Lower toolbar layout neutral tint */
+    border: 1px solid #7F9DB9; 
+    padding: 15px; 
+    border-radius: 4px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px;
+    color: #000000;
+}
+
+.template-save-deck h3 {
+    color: #032E6A;
+    border-bottom: 2px solid #F7931E; /* Orange Header Divider line */
+    padding-bottom: 4px;
+    margin-bottom: 5px;
+}
+
+.script-input { 
+    background: #FFFFFF; 
+    border: 1px solid #7F9DB9; 
+    color: #000000; 
+    font-family: monospace; 
+    padding: 6px; 
+    width: 100%; 
+    box-sizing: border-box;
+}
+
+/* Big Red Save/Cycle Button Custom Target Override */
+#kvm-big-red-cycle {
+    background-color: #D1172B;
+    border: none;
+    border-right: 2px solid #94101E; /* Crimson mechanical shadow bevel */
+    color: #FFFFFF;
+    cursor: pointer;
+    box-shadow: inset -1px 0px 3px rgba(0,0,0,0.3), 2px 0px 5px rgba(0,0,0,0.2);
+}
+
+#kvm-big-red-cycle:active {
+    background-color: #A61222;
+}
