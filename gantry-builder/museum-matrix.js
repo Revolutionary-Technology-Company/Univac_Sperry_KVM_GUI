@@ -60,5 +60,21 @@ export const MuseumHistoryMatrix = {
         cycle_multiplier: "8.2",
         system_id: "GM-UNIVAC-1105",
         telecom_class: "LOGISTICS_TELEGRAM_PACK"
+    },
+    "US_CENSUS_BUREAU_1951": {
+        node_name: "U.S. Census Bureau (Univac I Serial #1)",
+        location: "Historical Data Archive",
+        priority_weight: 4,
+        cycle_multiplier: "20.0",
+        system_id: "USCB-UNI-1",
+        telecom_class: "STATISTICAL_BATCH_RAW"
+    },
+    "BASIC_AVIATION_TELEMETRY": {
+        node_name: "Basic Aviation Knowledge (Telemetry Link)",
+        location: "Avionics Data Bus Bridge",
+        priority_weight: 9,
+        cycle_multiplier: "1.5",
+        system_id: "BAK-LINK-01",
+        telecom_class: "FLIGHT_VECTOR_STREAM"
     }
 };
