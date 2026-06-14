@@ -5,7 +5,7 @@
 import { UnivacMorseInstructions } from './instruction-set-map.js';
 import { VCardTelecomFactory } from '../core/vcard-telecom.js';
 import { UnivacPriorityQueue } from '../core/priority-queue.js';
-
+import { MuseumHistoryMatrix } from './museum-matrix.js'; // Import the matrix parameters
 const vcfFactory = new VCardTelecomFactory();
 const priorityQueue = new UnivacPriorityQueue();
 
@@ -47,15 +47,39 @@ class GantryTemplateEngine {
         this.draggedData = null;
     }
 
+class SperryGantryBuilderApp {
+    constructor() {
+        // Core structural element anchors
+        this.nodeSelect = document.getElementById('macro-node-target-select');
+        this.activeStack = [];
+        
+        // Setup initial default selected profile reference
+        this.selectedNodeKey = "NVIDIA_TITAN_NODE";
+    }
+
     init() {
         this.renderInstructionSidebar();
         this.setupDragAndDropListeners();
         this.bindSaveAction();
+        this.populateMatrixDropdown();
+        this.bindMatrixSelectionEngine();
     }
 
     /**
      * Builds draggable items using historical instruction arrays
      */
+    populateMatrixDropdown() {
+        if (!this.nodeSelect) return;
+
+        let optionsHtml = "";
+        Object.keys(MuseumHistoryMatrix).forEach(key => {
+            const node = MuseumHistoryMatrix[key];
+            optionsHtml += `<option value="${key}">${node.node_name}</option>`;
+        });
+
+        this.nodeSelect.innerHTML = optionsHtml;
+        this.updateMetadataDisplayPanel(); // Force sync of initial text parameters
+    }
     renderInstructionSidebar() {
         let sidebarHtml = "<h3>INSTRUCTIONS</h3>";
         
@@ -160,8 +184,50 @@ class GantryTemplateEngine {
     }
 
     /**
+     * Passes the current profile settings directly into the file compiler during saves
+     */
+    executeSaveAction() {
+        if (this.activeStack.length === 0) return;
+
+        const nodeMeta = MuseumHistoryMatrix[this.selectedNodeKey];
+        const macroCompiledMorse = this.activeStack.map(x => x.morse).join(' ');
+
+        // Incorporate the exact python dictionary variables inside the active vCard configuration envelope
+        const compiledConfigBlock = {
+            templateStyleName: document.getElementById('macro-style-name').value.trim(),
+            targetNode: this.selectedNodeKey,
+            systemId: nodeMeta.system_id,
+            priorityWeight: nodeMeta.priority_weight,
+            timestamp: new Date().toISOString(),
+            instructionCount: this.activeStack.length,
+            compiledMorseString: macroCompiledMorse
+        };
+
+        // Export standard .vcf address telecom file layout format asset block
+        this.vcfFactory.downloadVcfAsset(compiledConfigBlock);
+
+        // Queue into the priority compute pipeline matrix loop using exact matrix weights
+        this.priorityQueue.enqueueStatement(compiledConfigBlock, this.selectedNodeKey);
+    /**
      * Saves the current layout stack configuration to a localized JSON file context
      */
+    bindMatrixSelectionEngine() {
+        this.nodeSelect.addEventListener('change', (e) => {
+            this.selectedNodeKey = e.target.value;
+            this.updateMetadataDisplayPanel();
+            
+            const nodeMeta = MuseumHistoryMatrix[this.selectedNodeKey];
+            this.logToMonitor("MUSEUM_MATRIX", `Active hardware context switched to: [${nodeMeta.node_name}]`);
+        });
+    updateMetadataDisplayPanel() {
+        const nodeMeta = MuseumHistoryMatrix[this.selectedNodeKey];
+        if (!nodeMeta) return;
+
+        document.getElementById('lbl-sys-id').textContent = nodeMeta.system_id;
+        document.getElementById('lbl-prio-weight').textContent = nodeMeta.priority_weight;
+        document.getElementById('lbl-cycle-factor').textContent = `${nodeMeta.cycle_multiplier}x multiplier`;
+    }
+
     bindSaveAction() {
         const saveBtn = document.getElementById('kvm-big-red-cycle');
         
