@@ -1,7 +1,7 @@
 /**
- * Dorado Mainframe VST Allocation Control Module with Automated VCF Export
+ * Dorado Mainframe VST Allocation Control Module with Live Status & TPS Counter
  * Designed for Revolutionary-Technology-Company/Univac_Sperry_KVM_GUI
- * Automatically generates and sinks a .vcf block to local systems upon configuration change.
+ * Coordinates with Univac-Aegis-bridge to alter MIPS, monitor states, and trace TPS.
  */
 
 export class DoradoVstKnob extends HTMLElement {
@@ -53,25 +53,36 @@ export class DoradoVstKnob extends HTMLElement {
                     margin-bottom: 12px;
                     letter-spacing: 1px;
                 }
-                .led-matrix {
+                
+                /* Telemetry Bay: Combines LEDs and Digital Counter Display */
+                .telemetry-bay {
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
                     margin-bottom: 15px;
-                    padding: 0 5px;
+                    background: #070707;
+                    border: 1px solid #222;
+                    border-radius: 4px;
+                    padding: 6px;
+                }
+
+                .led-matrix {
+                    display: flex;
+                    gap: 6px;
                 }
                 .led-container {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 4px;
+                    gap: 2px;
                 }
                 .led-label {
-                    font-size: 8px;
-                    color: #888;
+                    font-size: 7px;
+                    color: #666;
                 }
                 .led {
-                    width: 10px;
-                    height: 10px;
+                    width: 8px;
+                    height: 8px;
                     border-radius: 50%;
                     background-color: #222;
                     box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
@@ -79,16 +90,42 @@ export class DoradoVstKnob extends HTMLElement {
                 }
                 .led-busy.active {
                     background-color: #00ff66;
-                    box-shadow: 0 0 8px #00ff66, inset 0 1px 0px rgba(255,255,255,0.5);
+                    box-shadow: 0 0 6px #00ff66, inset 0 1px 0px rgba(255,255,255,0.5);
                 }
                 .led-idle.active {
                     background-color: #0099ff;
-                    box-shadow: 0 0 8px #0099ff, inset 0 1px 0px rgba(255,255,255,0.5);
+                    box-shadow: 0 0 6px #0099ff, inset 0 1px 0px rgba(255,255,255,0.5);
                 }
                 .led-fault.active {
                     background-color: #ff3333;
-                    box-shadow: 0 0 8px #ff3333, inset 0 1px 0px rgba(255,255,255,0.5);
+                    box-shadow: 0 0 6px #ff3333, inset 0 1px 0px rgba(255,255,255,0.5);
                 }
+
+                /* TPS Digital Counter Styling */
+                .tps-counter-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
+                .tps-display {
+                    background: #000;
+                    border: 1px solid #333;
+                    border-radius: 2px;
+                    padding: 2px 4px;
+                    font-size: 11px;
+                    color: #ff9900; /* Amber gas-discharge nixie color styling */
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    min-width: 32px;
+                    text-align: right;
+                }
+                .tps-label {
+                    font-size: 7px;
+                    color: #666;
+                    margin-top: 2px;
+                    text-transform: uppercase;
+                }
+
                 .knob-container {
                     position: relative;
                     width: 80px;
@@ -135,18 +172,28 @@ export class DoradoVstKnob extends HTMLElement {
             
             <div class="vst-title">Dorado Control</div>
             
-            <div class="led-matrix">
-                <div class="led-container">
-                    <div class="led led-busy" id="ledBusy"></div>
-                    <div class="led-label">BUSY</div>
+            <!-- Telemetry Monitoring Bay -->
+            <div class="telemetry-bay">
+                <!-- Status Matrix Indicators -->
+                <div class="led-matrix">
+                    <div class="led-container">
+                        <div class="led led-busy" id="ledBusy"></div>
+                        <div class="led-label">BSY</div>
+                    </div>
+                    <div class="led-container">
+                        <div class="led led-idle" id="ledIdle"></div>
+                        <div class="led-label">IDL</div>
+                    </div>
+                    <div class="led-container">
+                        <div class="led led-fault" id="ledFault"></div>
+                        <div class="led-label">FLT</div>
+                    </div>
                 </div>
-                <div class="led-container">
-                    <div class="led led-idle" id="ledIdle"></div>
-                    <div class="led-label">IDLE</div>
-                </div>
-                <div class="led-container">
-                    <div class="led led-fault" id="ledFault"></div>
-                    <div class="led-label">FLT</div>
+
+                <!-- Digital TPS Tracing Counter Display -->
+                <div class="tps-counter-container">
+                    <div class="tps-display" id="tpsVal">0000</div>
+                    <div class="tps-label">TPS Trace</div>
                 </div>
             </div>
 
@@ -203,7 +250,7 @@ export class DoradoVstKnob extends HTMLElement {
         if (this.isDragging) {
             this.isDragging = false;
             this.commitConfigSync();
-            this.generateAndExportVcf(); // Triggers automated macro generation on mouse-release
+            this.generateAndExportVcf();
         }
     }
 
@@ -218,71 +265,78 @@ export class DoradoVstKnob extends HTMLElement {
         display.textContent = String(this.currentMips).padStart(4, '0');
     }
 
+    /**
+     * Queries the KVM telemetry bridge for execution data metrics
+     */
     startStatusPolling() {
         this.pollInterval = setInterval(async () => {
             try {
                 const response = await fetch('http://localhost:8081/api/bridge/status');
                 if (!response.ok) throw new Error('Degradation');
+                
                 const data = await response.json();
-                this.updateLeds(data.state);
-            } catch (err) {
-                this.updateLeds('FAULT');
-            }
-        }, 350);
-    }
-
-    updateLeds(state) {
-        const busyLed = this.shadowRoot.getElementById('ledBusy');
-        const idleLed = this.shadowRoot.getElementById('ledIdle');
-        const faultLed = this.shadowRoot.getElementById('ledFault');
-
-        busyLed.classList.remove('active');
-        idleLed.classList.remove('active');
-        faultLed.classList.remove('active');
-
-        switch (String(state).toUpperCase()) {
-            case 'BUSY':
-                busyLed.classList.add('active');
-                break;
-            case 'IDLE':
-                idleLed.classList.add('active');
-                break;
-            default:
-                faultLed.classList.add('active');
-                break;
-        }
-    }
-
-    async dispatchDmaWrite() {
-        try {
-            await fetch('http://localhost:8081/api/bridge/write', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reg: "DORADO_MIPS_REG",
-                    val: this.currentMips
-                })
-            });
-        } catch (err) {
-            console.debug('Bridge DMA sink unreached:', err);
-        }
-    }
-
-    async commitConfigSync() {
-        this.dispatchEvent(new CustomEvent('dorado-mips-sync', {
-            detail: { mips: this.currentMips },
-            bubbles: true,
-            composed: true
-        }));
-    }
-
-    /**
-     * Compiles data payload, generates a structural CRC32 checksum, and pushes files to local workspace targets
-     */
-    async generateAndExportVcf() {
-        const paddedMips = String(this.currentMips).padStart(4, '0');
-        const timestamp = new Date().toISOString();
-        // Construct standard Unisys-style configuration structure block
+                // Parses structure payload. Expects: { state: string, tps: number }
+this.updateLeds(data.state);
+this.updateTpsCounter(data.tps || 0);
+} catch (err) {
+this.updateLeds('FAULT');
+this.updateTpsCounter(0);
+}
+}, 350);
+}
+updateLeds(state) {
+const busyLed = this.shadowRoot.getElementById('ledBusy');
+const idleLed = this.shadowRoot.getElementById('ledIdle');
+const faultLed = this.shadowRoot.getElementById('ledFault');
+busyLed.classList.remove('active');
+idleLed.classList.remove('active');
+faultLed.classList.remove('active');
+switch (String(state).toUpperCase()) {
+case 'BUSY':
+busyLed.classList.add('active');
+break;
+case 'IDLE':
+idleLed.classList.add('active');
+break;
+default:
+faultLed.classList.add('active');
+break;
+}
+}
+/**
+* Formats and pushes transaction parameters onto the tracking digital array
+* @param {number} rawTps - Transactions per second metric value
+*/
+updateTpsCounter(rawTps) {
+const tpsDisplay = this.shadowRoot.getElementById('tpsVal');
+// Truncate values exceeding the 4-digit mechanical bounds display limit
+const boundedTps = Math.min(9999, Math.max(0, Math.round(rawTps)));
+tpsDisplay.textContent = String(boundedTps).padStart(4, '0');
+}
+async dispatchDmaWrite() {
+try {
+await fetch('http://localhost:8081/api/bridge/write', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+reg: "DORADO_MIPS_REG",
+val: this.currentMips
+})
+});
+} catch (err) {
+console.debug('Bridge DMA sink unreached:', err);
+}
+}
+async commitConfigSync() {
+this.dispatchEvent(new CustomEvent('dorado-mips-sync', {
+detail: { mips: this.currentMips },
+bubbles: true,
+composed: true
+}));
+}
+async generateAndExportVcf() {
+const paddedMips = String(this.currentMips).padStart(4, '0');
+const timestamp = new Date().toISOString();
 const fileContent = [
 [UNISYS_DORADO_CONFIGURATION_BLOCK],
 TIMESTAMP=${timestamp},
@@ -292,20 +346,18 @@ OPERATOR_ACTION=FIELD_THRESHOLD_ALTERATION,
 INTEGRITY_HASH=${this.calculateSimpleChecksum(paddedMips, timestamp)}
 ].join('\n');
 const filename = dorado_alloc_${paddedMips}mips_${Date.now()}.vcf;
-// Pathway 1: Push binary object data directly to local server storage pipeline
 try {
 await fetch('http://localhost:8081/api/bridge/export', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
 filename: filename,
-payload: btoa(fileContent) // Enforce raw string safety via Base64 serialization
+payload: btoa(fileContent)
 })
 });
 } catch (err) {
 console.warn('Local file system injection stream failed. Reverting to sandbox file generation.', err);
 }
-// Pathway 2: Sandbox download fallback injection
 const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
 const element = document.createElement('a');
 element.href = URL.createObjectURL(blob);
@@ -315,15 +367,12 @@ document.body.appendChild(element);
 element.click();
 document.body.removeChild(element);
 }
-/**
-* Generates an asset-integrity string tracking specific runtime variations
-*/
 calculateSimpleChecksum(mips, time) {
 const combined = ${mips}:${time};
 let hash = 0;
 for (let i = 0; i < combined.length; i++) {
 hash = (hash << 5) - hash + combined.charCodeAt(i);
-hash |= 0; // Convert to a 32bit signed integer
+hash |= 0;
 }
 return '0x' + Math.abs(hash).toString(16).toUpperCase();
 }
