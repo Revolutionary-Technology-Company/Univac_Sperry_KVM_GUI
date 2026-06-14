@@ -34,5 +34,31 @@ export const MuseumHistoryMatrix = {
         cycle_multiplier: "2.0",
         system_id: "AEGIS-SPY1",
         telecom_class: "REAL_TIME_STREAMING"
+    },
+    "NVIDIA_TITAN_NODE": {
+        node_name: "NVIDIA Titan Compute Array",
+        location: "Primary Tactical Compute Layer",
+        priority_weight: 10,
+        cycle_multiplier: "1.0",
+        system_id: "NV-TITAN-X",
+        telecom_class: "HIGH_PRIORITY_BURST"
+    },
+
+    // --- NEW ACCREDITED ENTERPRISE HISTORICAL NODES ---
+    "GENERAL_ELECTRIC_APPLIANCE_PARK": {
+        node_name: "General Electric Node (Appliance Park, KY)",
+        location: "Mainframe Room - Building 1 (1954 Pioneer Install)",
+        priority_weight: 6,
+        cycle_multiplier: "15.4", // Slower clock rates requiring higher cycle times
+        system_id: "GE-UNIVAC-I",
+        telecom_class: "COMMERCIAL_PAYROLL_RAW"
+    },
+    "GENERAL_MOTORS_LOGISTICS_DETROIT": {
+        node_name: "General Motors Node (Detroit Manufacturing Hub)",
+        location: "Automotive Assembly Routing Control Bay",
+        priority_weight: 7,
+        cycle_multiplier: "8.2",
+        system_id: "GM-UNIVAC-1105",
+        telecom_class: "LOGISTICS_TELEGRAM_PACK"
     }
 };
