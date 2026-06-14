@@ -367,3 +367,47 @@
     color: #555555;
 }
 
+/* Military Tactical Matte Olive Drab Chassis Design System */
+.vst-console-frame.olive-drab-chassis {
+    background-color: #4B5340; /* Authentic WWII Olive Drab Dull Paint Tone */
+    color: #EAE6DF;            /* Stencil Off-White text character overlays */
+    border: 4px solid #353B2E;
+    font-family: monospace;
+}
+
+.vst-console-header.line-olive {
+    border-bottom: 3px solid #2B3025;
+}
+
+.radio-rack-column.olive-well {
+    background-color: #3C4234; /* Recessed structural well sheet metal background tint */
+    border: 2px solid #2B3025;
+    padding: 12px;
+}
+
+.radio-rack-column.olive-well h2 {
+    color: #EAE6DF;
+    font-size: 11px;
+    letter-spacing: 1px;
+    border-bottom: 1px dashed #5F6952;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+}
+
+/* Hardened stamped metal framing borders for military component boxes */
+.vst-zone.military-border {
+    border: 1px solid #2B3025;
+    background-color: #424939;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.1);
+}
+
+.vst-zone.military-border h3 {
+    color: #C0C8B6;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+

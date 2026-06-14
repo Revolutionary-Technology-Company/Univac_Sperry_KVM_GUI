@@ -7,6 +7,7 @@ import { SperryConfigGuiPanel } from '../modules/config-panel.js';
 import { Scr610TransceiverPanel } from '../modules/scr610-transceiver.js';
 import { RadioAmps1400Panel } from '../modules/radio-amps-1400.js'; // Mount Radio Amps Panel
 import { System110080Panel } from '../modules/system-1100-80.js';
+import { Scr610TransceiverPanel } from '../modules/scr610-transceiver.js'; // Mount SCR-610 Module
 import { UnivacBridgeClient } from './bridge-client.js'; 
 import { MainframeTelemetryMock } from './telemetry-mock.js';
 import { AutomatedTrainingBot } from './training-bot.js'; // Import training file
@@ -50,7 +51,6 @@ export class UnivacKvmManager {
             }
         });
 
-        // Remainder of your initialization routine stays clean and unified...
         this.bindNavigationTargets();
         this.bindSimulationButtons();
         this.registerKeyboardShortcuts();
@@ -239,14 +239,30 @@ export class UnivacKvmManager {
     }
 
     /**
-     * Core router handling inbound live mainframe register changes.
+     * Core router handling inbound live mainframe schema updates or register changes
      */
     handleIncomingTelemetry(envelope) {
-        if (envelope.action === "CORE_REG_UPDATE") {
+        // Telemetry Intercept Route 1: Flight vector streams arriving from Basic-Aviation-Knowledge datasets
+        if (envelope.action === "AVIATION_COMPASS_STREAM") {
+            const { heading, pitch, roll, gyro_error } = envelope.payload;
+            
+            if (this.configGui && typeof this.configGui.updateCompassTelemetryTrack === 'function') {
+                // Pipe navigation data fields straight onto the WinForms configuration dashboard view
+                this.configGui.updateCompassTelemetryTrack(heading, pitch, roll, gyro_error);
+            }
+        }
+        
+        // Telemetry Intercept Route 2: Standard core register changes
+        else if (envelope.action === "CORE_REG_UPDATE") {
             const { reg, val } = envelope.payload;
             console.log(`📥 Downstream Sync Receiver -> Register [${reg}] updated to [${val}]`);
             
-            // Map updates directly to individual skeuomorphic VST switches or dials if mounted
+            // Push structured text diagnostic parameters directly onto our WinForms logging console
+            if (this.configGui && typeof this.configGui.appendTelemetryLog === 'function') {
+                const sourceTag = reg.startsWith('Z4_CH') ? 'AVIATION' : 'AEGIS';
+                this.configGui.appendTelemetryLog(sourceTag, `Transaction accepted. Register allocation address write: [${reg}] mapped to value states [${val}]`);
+            }
+
             if (this.hardwarePanel && this.hardwarePanel.controls[reg]) {
                 const controlItem = this.hardwarePanel.controls[reg];
                 if (typeof controlItem.updateHardwareState === 'function') {
@@ -255,6 +271,14 @@ export class UnivacKvmManager {
                 } else if (typeof controlItem.toggleState === 'function' && controlItem.state !== val) {
                     controlItem.toggleState();
                 }
+            }
+        }
+
+        // Telemetry Event 3: Dynamic metadata schema updates pushed from live repositories
+        else if (envelope.action === "METADATA_SCHEMA_PUSH") {
+            const { nodeId, bannerTitle, fields } = envelope.payload;
+            if (this.configGui) {
+                this.configGui.updateActiveNodeSchema(nodeId, bannerTitle, fields);
             }
         }
     }
