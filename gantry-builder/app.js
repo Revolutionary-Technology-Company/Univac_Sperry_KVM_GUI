@@ -3,6 +3,39 @@
  * Saves configuration templates directly to a localized JSON file context.
  */
 import { UnivacMorseInstructions } from './instruction-set-map.js';
+import { VCardTelecomFactory } from '../core/vcard-telecom.js';
+import { UnivacPriorityQueue } from '../core/priority-queue.js';
+
+const vcfFactory = new VCardTelecomFactory();
+const priorityQueue = new UnivacPriorityQueue();
+
+// Connect UI Elements to the priority queue engine modules
+const saveBtn = document.getElementById('kvm-big-red-cycle');
+saveBtn.addEventListener('click', () => {
+    // Generate the raw Gantry template layout dictionary parameters...
+    const templateConfigPayload = {
+        templateStyleName: document.getElementById('macro-style-name').value.trim(),
+        targetNode: document.getElementById('macro-node-target').value.trim(),
+        timestamp: new Date().toISOString(),
+        instructionCount: 6, // Active count array
+        compiledMorseString: ".-.. .- .-.. -" // Sample load statement string
+    };
+
+    // 1. Generate and compile the contact file array directly to Android phone book storage format
+    vcfFactory.downloadVcfAsset(templateConfigPayload);
+
+    // 2. Feed the configuration block directly into the high-priority NVIDIA queue pipeline
+    priorityQueue.enqueueStatement(templateConfigPayload, 'NVIDIA_TITAN_NODE');
+});
+
+// Hook up the physical Marconi 365EZ Short Base button interface element
+const marconiKeyBtn = document.getElementById('keyer-lever-target');
+if (marconiKeyBtn) {
+    marconiKeyBtn.addEventListener('click', () => {
+        // Enforce the 20-minute planning pause and process queued statements
+        priorityQueue.triggerMarconiKeyerDispatch();
+    });
+}
 
 class GantryTemplateEngine {
     constructor() {
