@@ -1,0 +1,103 @@
+/**
+ * NVIDIA CUDA Parallel Execution Thread Pool & Compilation Monitor.
+ * Visualizes thread blocks, grid allocations, and kernel telemetry strings in real time.
+ */
+export class NvidiaCudaThreadMonitor {
+    constructor(targetId) {
+        this.wrapper = document.getElementById(targetId);
+        this.TOTAL_CORES = 64; // Visual representation matrix block size
+        this.render();
+    }
+
+    render() {
+        let gridBlocksHtml = "";
+        for (let i = 0; i < this.TOTAL_CORES; i++) {
+            gridBlocksHtml += `<div class="cuda-core-node" id="cuda-core-${i}"></div>`;
+        }
+
+        this.wrapper.innerHTML = `
+            <div class="winforms-groupbox" style="margin-top: 10px; padding-top: 14px; background-color: #F0F5FA;">
+                <span class="winforms-groupbox-legend" style="color: #1A428A; font-weight: bold;">NVIDIA CUDA Parallel Compute Console</span>
+                
+                <div class="cuda-dashboard-split" style="display: flex; gap: 8px; height: 110px; box-sizing: border-box;">
+                    
+                    <!-- LEFT PANEL: GRID GRID ALLOCATION BLOCK MAP -->
+                    <div style="width: 140px; display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 9px; color: #555; font-weight: bold;">SM THREAD GRID ALLOCATION:</span>
+                        <div class="cuda-grid-matrix-mesh">
+                            ${gridBlocksHtml}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 8px; color: #666; margin-top: 2px;">
+                            <span>Active: <strong id="cuda-lbl-active">0</strong></span>
+                            <span>Blocks: <strong>1.5E75</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT PANEL: INDUSTRIAL NVCC COMPILER DATA WINDOW -->
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 9px; color: #555; font-weight: bold;">NVCC KERNEL TELEMETRY COMPILATION INPUT:</span>
+                        <div class="cuda-compiler-log-terminal" id="cuda-terminal-log-output">
+Awaiting tactical transaction block payload from Aegis priority queue...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Simulates live multi-threaded kernel compilation and parallel data block execution
+     * @param {string} opName - Name of the active macro or transaction node
+     * @param {number} priority - The weight of the pipeline item
+     */
+    triggerKernelExecution(opName, priority) {
+        const terminal = document.getElementById('cuda-terminal-log-output');
+        const activeLbl = document.getElementById('cuda-lbl-active');
+        if (!terminal) return;
+
+        const timestamps = () => new Date().toLocaleTimeString();
+        
+        // Phase 1: Output standard NVCC compiler optimization telemetry strings
+        terminal.innerText = `[${timestamps()}] nvcc -arch=sm_90 -c ${opName.toLowerCase()}.cu -o ${opName.toLowerCase()}.o\n`;
+        terminal.innerText += `[${timestamps()}] PTX Compiler: Optimizing parallel pipelines for execution matrix blocks...\n`;
+        terminal.innerText += `[${timestamps()}] CUDA Memory Allocation: cudaMalloc managed memory array context bound securely.\n`;
+
+        // Phase 2: Spin up the visual grid core lights loop sequentially
+        let coreIndex = 0;
+        const threadBurstInterval = setInterval(() => {
+            if (coreIndex >= this.TOTAL_CORES) {
+                clearInterval(threadBurstInterval);
+                
+                // Finalize sequence logs
+                terminal.innerText += `[${timestamps()}] Kernel Execution complete: <<<Grid, Block>>> synchronized. Thread exit code 0.\n`;
+                terminal.scrollTop = terminal.scrollHeight;
+                
+                // Rest the display blocks back to default inactive state after a brief cooling phase
+                setTimeout(() => this.resetMatrixMesh(), 600);
+                return;
+            }
+
+            // Light up a cluster of 4 parallel streams simultaneously per cycle tick
+            for (let b = 0; b < 4; b++) {
+                const targetNode = document.getElementById(`cuda-core-${coreIndex}`);
+                if (targetNode) {
+                    targetNode.classList.add('core-thread-firing');
+                }
+                coreIndex++;
+            }
+
+            if (activeLbl) activeLbl.textContent = coreIndex;
+            terminal.scrollTop = terminal.scrollHeight;
+        }, 30);
+    }
+
+    resetMatrixMesh() {
+        const activeLbl = document.getElementById('cuda-lbl-active');
+        if (activeLbl) activeLbl.textContent = "0";
+        for (let i = 0; i < this.TOTAL_CORES; i++) {
+            const core = document.getElementById(`cuda-core-${i}`);
+            if (core) core.classList.remove('core-thread-firing');
+        }
+    }
+}
