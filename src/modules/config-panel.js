@@ -2,6 +2,7 @@
  * Sperry Software Dynamic WinForms Renderer with Real-time Telemetry Data Logging
  * Integrates direct instrumentation track feeds from Basic-Aviation-Knowledge.
  */
+import { SperrySoftwareLogo } from '../components/sperry-software-logo.js';
 export class SperryConfigGuiPanel {
     constructor(containerId, bridgeClient) {
         this.container = document.getElementById(containerId);
@@ -20,9 +21,7 @@ export class SperryConfigGuiPanel {
         this.loadFallbackSchema();
     }
 
-    renderWindowFrame() {
-        this.container.innerHTML = `
-            <div class="sperry-software-window">
+           <div class="sperry-software-window">
                 <div class="winforms-titlebar">
                     <div class="titlebar-left">
                         <div class="sperry-app-icon-slot"></div>
@@ -31,12 +30,24 @@ export class SperryConfigGuiPanel {
                 </div>
 
                 <div class="winforms-canvas">
-                    <div class="sperry-brand-banner">
-                        <div class="banner-left-logo-slot"></div>
-                        <span class="banner-title-text" id="winforms-banner-text">Aegis & Aviation Core Control</span>
-                        <div class="banner-right-photo-slot"></div>
+                    <!-- GRADIENT BANNER HEADER ASSEMBLY MOUNTING GENUINE LOGO VECTOR ARRAYS -->
+                    <div class="sperry-brand-banner" style="background: linear-gradient(to right, #F7931E 0%, #FFD200 45%, #FFFFFF 85%); height: 110px;">
+                        
+                        <!-- NEW ACTIVE LOGO ELEMENT SLOT -->
+                        <div style="position: absolute; left: 8px; top: 2px; z-index: 10;">
+                            ${SperrySoftwareLogo.getInlineSvg()}
+                        </div>
+                        
+                        <!-- Adjusted text margin layout parameters to account for the new logo scale bounds -->
+                        <span class="banner-title-text" id="winforms-banner-text" style="margin-left: 156px; font-size: 16px; margin-top: 12px; display: inline-block;">
+                            Telecom Instruction Scripting
+                        </span>
+                        
+                        <div class="banner-right-photo-slot" style="height: 110px;"></div>
                     </div>
-
+                    
+                    <!-- Split views workspace layouts continue below cleanly ... -->
+                            
                     <div style="display: flex; padding: 6px; gap: 8px; height: calc(100% - 176px); box-sizing: border-box;">
                         
                         <div style="width: 172px; display: flex; flex-direction: column;">
