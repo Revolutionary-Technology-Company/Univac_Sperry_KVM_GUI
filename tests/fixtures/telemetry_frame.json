@@ -1,0 +1,24 @@
+{
+  "timestamp": 1784043850,
+  "telemetry_source": "Basic-Aviation-Knowledge-Engine",
+  "flight_mode": "TACTICAL_LIVE",
+  "gps_data": {
+    "latitude": 47.53252,
+    "longitude": -122.19015,
+    "elevation_barometric_feet": 2450.7,
+    "satellites_locked": 12,
+    "nmea_string_type": "$GNGGA"
+  },
+  "performance_metrics": {
+    "true_airspeed": 249.9998,
+    "density_altitude_feet": 2840.1,
+    "g_load_vertical": 1.02,
+    "icing_probability_index": 0.02
+  },
+  "atmospheric_state": {
+    "t_station_celsius": 14.2,
+    "t_rural_baseline_celsius": 11.5,
+    "urban_heat_island_offset": 2.7,
+    "radar_footprint_verified": true
+  }
+}
