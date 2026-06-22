@@ -1,0 +1,9 @@
+# WebSockets for asynchronous communication between Python and the Vanilla JS GUI
+websockets>=11.0.3
+
+# Data manipulation (Required if data_feed.py is still processing any CSV/Excel files before JSON conversion)
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Serial communication (Required if your KVM/Sperry hardware is reading from physical COM/Serial ports)
+pyserial>=3.5
