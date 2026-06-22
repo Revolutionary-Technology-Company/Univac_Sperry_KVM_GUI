@@ -66,6 +66,15 @@ class KVMController:
                 action = data.get("action")
                 payload = data.get("payload", {})
 
+                # Intercept the scrolling event
+                if action == "KVM_CYCLE":
+                    active_mode = payload.get("mode")
+                    print(f"[KVM SWAP]: Video routed to -> {active_mode}")
+                
+                    if active_mode == "CSF_FIREWALL":
+                        print("[SECURITY]: Operator viewing live packet filter...")
+                        # Optional: Ping WatchGuard API or update local UI status
+
                 if action == "TELETANK_CMD":
                     print(f"[TELETANK DIRECTIVE]: {payload}")
                     # Route this to the Univac-Aegis-bridge logic controllers
